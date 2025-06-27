@@ -6,5 +6,6 @@ from django.http import HttpResponse
 
 
 urlpatterns = [
-    path('', views.home, name='home'),    
+    path('', views.home, name='home'),   
+    path('about/',views.about_view,name='about'), 
 ]
