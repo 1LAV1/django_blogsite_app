@@ -1,0 +1,14 @@
+# Ignore virtualenv
+env/
+venv/
+__pycache__/
+*.pyc
+
+# Ignore DB and sensitive files
+db.sqlite3
+*.sqlite3
+.env
+
+# VS Code and OS files
+.vscode/
+.DS_Store
