@@ -4,7 +4,7 @@ from .models import blogsite_post
 from django import forms
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
-
+from django.db.models import Q
 
 
 # ------------------------------------------------------------------------------------------------------------------
@@ -18,9 +18,16 @@ class blog_form(forms.ModelForm):
 # ------------------------------------------------------------------------------------------------------------------
 
 def home(request):
-    posts= blogsite_post.objects.all().order_by('-date_created')  # Fetch all posts ordered by date_created in descending order
+    query= request.GET.get('q')
+    if query:
+        posts = blogsite_post.objects.filter( Q(title__icontains=query) | Q(content__icontains=query)).order_by('-date_created')
+    else:   
+        posts= blogsite_post.objects.all().order_by('-date_created')  # Fetch all posts ordered by date_created in descending order
+
+    # posts= blogsite_post.objects.all().order_by('-date_created')  # Fetch all posts ordered by date_created in descending order
     context={
         "posts":posts,
+        "query": query,
     }
     return render(request, 'blog/home.html',context)
 # ------------------------------------------------------------------------------------------------------------------
