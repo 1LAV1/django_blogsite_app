@@ -10,6 +10,8 @@
             <a href="{% url 'post_detail' post.id %}">{{post.title}} </a>
             <p>{{ post.content|truncatewords:20 }}</p>
              <p><i>Posted on {{ post.date_created }}</i></p>
+            
+             
             <hr>
 
         </li>
