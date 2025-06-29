@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-!)_fih9%r3njo+zklu_w75gt9(rz%j9h$-+108(#nzjvsi38#j')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = 'True'
 
 ALLOWED_HOSTS = ['blogsite-8ezn.onrender.com', 'localhost', '127.0.0.1']
 
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'blog',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -83,6 +84,10 @@ DATABASES = {
     }
 }
 
+# Only override the database if DATABASE_URL is set (i.e., on Render)
+if os.environ.get('DATABASE_URL'):
+    DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -125,4 +130,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+
+LOGIN_URL = '/accounts/login/'

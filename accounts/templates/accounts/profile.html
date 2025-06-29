@@ -1,0 +1,40 @@
+<div class="container mt-5">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h1 class="card-title">{{ user.username|title }}'s Profile</h1>
+            {% if user.is_authenticated %}
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Total Posts:</strong> {{ posts_count }}</p>
+                <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm mb-3">Logout</a>
+            {% else %}
+                <p><a href="{% url 'login' %}">Login</a> to view your profile.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if user.is_authenticated %}
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h2 class="mb-0">Your Posts</h2>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% if posts %}
+                    {% for post in posts %}
+                        <li class="list-group-item">
+                            <h5>
+                                <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
+                            </h5>
+                            <p class="mb-1">{{ post.content|truncatewords:30 }}</p>
+                            <small class="text-muted">Published: {{ post.date_created|date:"d M Y H:i" }}</small>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li class="list-group-item text-muted">No posts yet by this user.</li>
+                {% endif %}
+            </ul>
+        </div>
+    {% endif %}
+</div>
+
+
+

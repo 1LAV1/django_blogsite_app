@@ -1,11 +1,30 @@
 {% extends 'main.html' %}
 {% block content %}
 <h1>{{ post.title }}</h1>
-
 <p>{{ post.content }}</p>
 <p>
+    {% if user == post.author %}
     <a href="{% url 'post_update' post.id %}">✏️ Edit</a> |
     <a href="{% url 'post_delete' post.id %}">🗑️ Delete</a>
+    {% endif %}
 </p>
+<h2>Comments</h2>
+{% for comment in comments %}
+    <p><strong>{{ comment.author.username }}</strong>: {{ comment.content }}</p>
+{% empty %}
+    <p>No comments yet.</p>
+{% endfor %}
+
+<h3>Add a comment</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Post Comment</button>
+</form>
+{% if user.is_authenticated %}
+    <p>Logged in as {{ user.username }}. <a href="{% url 'logout' %}">Logout</a></p>
+{% else %}
+    <p><a href="{% url 'login' %}">Login</a> to comment.</p>
+{% endif %}
 
 {% endblock %}

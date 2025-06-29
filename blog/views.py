@@ -1,20 +1,16 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse as httpResponse
-from .models import blogsite_post
+from .models import blogsite_post , comments
+from .forms import comment_form, blog_form
 from django import forms
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.db.models import Q
+from django.http import HttpResponseForbidden
 
 
 # ------------------------------------------------------------------------------------------------------------------
-class blog_form(forms.ModelForm):
-    class Meta:
-        model= blogsite_post
-
-        fields= ['title','content']  # Specify the fields to include in the form
-
-
+ # Specify the fields to include in the form
 # ------------------------------------------------------------------------------------------------------------------
 
 def home(request):
@@ -34,24 +30,40 @@ def home(request):
 def about_view(request):
     return  render(request, 'blog/about.html')
 # ------------------------------------------------------------------------------------------------------------------
-def post_detail_view(request,post_id):
-    try:
-        post = blogsite_post.objects.get(id=post_id)
-    except blogsite_post.DoesNotExist:
-        return httpResponse("Post not found", status=404)
+def post_detail_view(request, post_id):
+    post = get_object_or_404(blogsite_post, id=post_id)
+    all_comments = post.comments.all().order_by('-date_created')
+
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return redirect('login')  # Redirect to login if user is not authenticated
+        form = comment_form(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.author = request.user  # Make sure your Comment model has an 'author' field
+            comment.save()
+            return redirect('post_detail', post_id=post.id)
+    else:
+        form = comment_form()
 
     context = {
-        "post": post,
+        'post': post,
+        'comments': all_comments,
+        'form': form,
     }
     return render(request, 'blog/post_detail.html', context)
 # ------------------------------------------------------------------------------------------------------------------
 
-# @login_required
+@login_required
 def create_post_view(request):
+    
     if request.method=='POST':
         form=blog_form(request.POST)
         if form.is_valid():
-            form.save()
+            post=form.save(commit=False)
+            post.author=request.user
+            post.save()
             return redirect(home)
     else:   
         form=blog_form()
@@ -63,8 +75,11 @@ def create_post_view(request):
 # ------------------------------------------------------------------------------------------------------------------
 
 @never_cache
+@login_required
 def post_update_view(request,post_id):
     post= blogsite_post.objects.get(id=post_id)
+    if(post.author != request.user):
+        return HttpResponseForbidden("You are not allowed to edit this post.")
     if request.method=='POST':
         form=blog_form(request.POST,instance=post)
         if form.is_valid():
@@ -78,7 +93,10 @@ def post_update_view(request,post_id):
     }
     return render(request,'blog/post_update.html',context)
 # ------------------------------------------------------------------------------------------------------------------
+@login_required
 def post_delete_view(request,post_id):
+    if(not request.user.is_authenticated):
+        return HttpResponseForbidden("You are not allowed to delete this post.")
     post = blogsite_post.objects.get(id=post_id)
     if request.method == 'POST':
         post.delete()
