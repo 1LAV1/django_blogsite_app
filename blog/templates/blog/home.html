@@ -22,7 +22,11 @@
                     </a>
                 </h4>
                 <p>{{ post.content|truncatewords:30|highlight:query }}</p>
-                <small class="text-muted">Posted on {{ post.date_created }}</small>
+                
+                    <small class="text-muted">
+                        Published on {{ post.date_created|date:"d M Y H:i" }} |
+                        💖 {{ post.total_likes }} like{{ post.total_likes|pluralize }}
+                    </small>
                     {% if user == post.author %}
                         <a href="{% url 'post_update' post.id %}">Edit</a> |
                         <a href="{% url 'post_delete' post.id %}">Delete</a>

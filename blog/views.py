@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.db.models import Q
 from django.http import HttpResponseForbidden
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 
 # ------------------------------------------------------------------------------------------------------------------
@@ -105,3 +107,17 @@ def post_delete_view(request,post_id):
         'post': post,
     }
     return render(request, 'blog/post_delete.html', context)
+
+
+
+
+@login_required
+def like_post_view(request,post_id):
+    post=get_object_or_404(blogsite_post, id=post_id)
+    if request.user in post.likes.all():
+        post.likes.remove(request.user)
+        messages.success(request, "You unliked the post.")
+    else:
+        post.likes.add(request.user)
+        messages.success(request, "You liked the post.")
+    return redirect('post_detail', post_id=post.id)
